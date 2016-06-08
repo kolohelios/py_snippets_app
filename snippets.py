@@ -24,8 +24,6 @@ def put(name, snippet):
             command = 'update snippets set message=%s where keyword=%s'
             cursor.execute(command, (snippet, name))
     logging.debug('Snippet stored successfully.')
-    
-    # logging.error('FIXME: Unimplemented - put({!r}, {!r})'.format(name, snippet))
     return name, snippet
     
 def get(name):
@@ -42,7 +40,17 @@ def get(name):
         return '404: Snippet Not Found'
     return row[0]
     
-    # logging.error('FIXME: Unimplemented - get({!r})'.format(name))
+def catalog():
+    '''
+    Get a catalog of snippet keywords from the database.
+    '''
+    
+    logging.info('Fetching catalog')
+    with connection, connection.cursor() as cursor:
+        cursor.execute('select keyword from snippets order by keyword')
+        keywords = cursor.fetchall()
+    return keywords
+    
 
 def main():
     '''Main function'''
@@ -59,6 +67,8 @@ def main():
     
     get_parser = subparsers.add_parser('get', help = 'Retrieve a snippet')
     get_parser.add_argument('name', help = 'Name of the snippet')
+    
+    get_parser = subparsers.add_parser('catalog', help = 'Get a list of all keywords')
 
     arguments = parser.parse_args()
     
@@ -71,6 +81,11 @@ def main():
     elif command == 'get':
         snippet = get(**arguments)
         print('Retrieved snippet: {!r}'.format(snippet))
+    elif command == 'catalog':
+        keywords = catalog()
+        print('Fetching catalog')
+        for keyword in keywords:
+            print(keyword[0])
     
 if __name__ == '__main__':
     main()
